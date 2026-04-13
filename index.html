@@ -32,6 +32,13 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
 .spinner{width:34px;height:34px;border:2.5px solid rgba(45,90,61,.15);border-top-color:#2D5A3D;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 .screen{display:none}.active{display:block}
+.lang-wrap{width:100%;max-width:370px;text-align:center}
+.lang-title{font-family:'Lora',serif;font-size:22px;color:#2D5A3D;margin-bottom:6px}
+.lang-sub{font-size:12px;color:rgba(45,90,61,.5);margin-bottom:24px;font-style:italic;font-family:'Lora',serif}
+.lang-picker{display:flex;gap:10px}
+.lang-btn{flex:1;padding:16px 10px;border:2px solid #2D5A3D;border-radius:14px;background:transparent;color:#2D5A3D;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.lang-btn:active{background:#2D5A3D;color:#F5F0E8}
+.lang-flag{font-size:24px;display:block;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -40,7 +47,24 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
 <div id="s-loading" class="screen active">
   <div style="text-align:center">
     <div class="spinner"></div>
-    <p style="color:#2D5A3D;font-size:13px;opacity:.55;margin-top:14px;font-family:'Lora',serif">Kuponun hazırlanıyor…</p>
+    <p style="color:#2D5A3D;font-size:13px;opacity:.55;margin-top:14px;font-family:'Lora',serif">…</p>
+  </div>
+</div>
+
+<!-- DİL SEÇİCİ -->
+<div id="s-lang" class="screen">
+  <div class="lang-wrap">
+    <div style="font-size:36px;margin-bottom:14px">🌱</div>
+    <div class="lang-title">Panama Coffee · Taşucu</div>
+    <div class="lang-sub">Birlikte 1 Yıl · 1 год вместе</div>
+    <div class="lang-picker">
+      <button class="lang-btn" onclick="setLang('tr')">
+        <span class="lang-flag">🇹🇷</span>Türkçe
+      </button>
+      <button class="lang-btn" onclick="setLang('ru')">
+        <span class="lang-flag">🇷🇺</span>Русский
+      </button>
+    </div>
   </div>
 </div>
 
@@ -51,22 +75,22 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
       <div class="glow"></div>
       <div class="brand">Panama Coffee · Taşucu</div>
       <div style="font-size:34px;margin:10px 0 6px;position:relative">🌱</div>
-      <div class="headline">Birlikte<br><span style="color:#C8A96E;font-style:italic">1 Yıl.</span></div>
-      <div class="subhead">Seninle büyüdük — teşekkür ederiz</div>
+      <div class="headline" id="fresh-headline"></div>
+      <div class="subhead" id="fresh-subhead"></div>
     </div>
     <div class="body">
-      <p class="thanks">Bu bir yılda kahve içtiğin, vakit geçirdiğin ve bize güvendiğin için gerçekten <strong style="color:#1E3D29">çok teşekkür ederiz.</strong></p>
+      <p class="thanks" id="fresh-thanks"></p>
       <div class="cbox">
         <div class="notch notch-l"></div>
         <div class="notch notch-r"></div>
         <div class="pct">%20</div>
-        <div class="pct-label">İNDİRİM KUPONU</div>
+        <div class="pct-label" id="fresh-pct-label"></div>
         <div class="divider"></div>
         <div class="code" id="code-fresh"></div>
-        <div class="code-sub">Kasaya göster · Tek kullanımlık</div>
+        <div class="code-sub" id="fresh-code-sub"></div>
       </div>
-      <button class="btn" id="btn-confirm">✓&nbsp; Katıldım, kuponu kullanacağım</button>
-      <div class="fine">Butona basmak kuponu aktifleştirir. Bir kez kullanılabilir.<br>Geçerlilik: tüm ürünler · Panama Coffee Taşucu</div>
+      <button class="btn" id="btn-confirm"></button>
+      <div class="fine" id="fresh-fine"></div>
     </div>
   </div>
 </div>
@@ -78,19 +102,19 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
       <div class="glow"></div>
       <div class="brand">Panama Coffee · Taşucu</div>
       <div style="font-size:40px;margin:12px 0 8px;position:relative">🎉</div>
-      <div class="headline">Kuponu<br>kazandın!</div>
-      <div class="subhead">Kasiyer bu ekranı görsün</div>
+      <div class="headline" id="conf-headline"></div>
+      <div class="subhead" id="conf-subhead"></div>
     </div>
     <div class="body">
-      <p class="thanks">Sonraki ziyaretinde tüm ürünlerde <strong style="color:#1E3D29">%20 indirim</strong> kazandın. Bu sayfayı kasiyere göster.</p>
+      <p class="thanks" id="conf-thanks"></p>
       <div class="cbox">
         <div class="notch notch-l"></div>
         <div class="notch notch-r"></div>
         <div class="pct">%20</div>
-        <div class="pct-label">İNDİRİM KUPONU · AKTİF</div>
+        <div class="pct-label" id="conf-pct-label"></div>
         <div class="divider"></div>
         <div class="code" id="code-confirmed"></div>
-        <div class="code-sub" style="color:#2D5A3D;font-weight:500">✓ Aktifleştirildi</div>
+        <div class="code-sub" id="conf-code-sub"></div>
       </div>
       <div class="fine" id="confirmed-date"></div>
     </div>
@@ -104,10 +128,10 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
       <div class="glow"></div>
       <div class="brand">Panama Coffee · Taşucu</div>
       <div style="font-size:36px;margin:12px 0 8px;position:relative">☕</div>
-      <div class="headline">Bu kupon<br>kullanıldı.</div>
+      <div class="headline" id="used-headline"></div>
     </div>
     <div class="body" style="text-align:center">
-      <p class="thanks" style="color:#5a4a3a">Bu indirim kuponu daha önce kullanılmış.<br>Bize bir yıllık güvenin için teşekkürler — seni tekrar görmekten mutluluk duyarız. 🌿</p>
+      <p class="thanks" id="used-thanks" style="color:#5a4a3a"></p>
       <div class="fine" id="used-date"></div>
       <div class="fine" style="margin-top:16px">@panamacoffee · #Panama1Yil</div>
     </div>
@@ -115,69 +139,16 @@ body{min-height:100vh;background:#F5F0E8;display:flex;align-items:center;justify
 </div>
 
 <script>
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function formatCode(id) {
-  return id.replace(/([A-Za-z]+)(\d+)/, '$1-$2').toUpperCase();
-}
-
-function getOrCreateId() {
-  let id = localStorage.getItem('panama_kupon_id');
-  if (!id) {
-    id = 'PTK' + Math.random().toString(36).substr(2,6).toUpperCase();
-    localStorage.setItem('panama_kupon_id', id);
-  }
-  return id;
-}
-
-function getState() {
-  const s = localStorage.getItem('panama_kupon_state');
-  return s ? JSON.parse(s) : null;
-}
-
-function setState(data) {
-  localStorage.setItem('panama_kupon_state', JSON.stringify(data));
-}
-
-// INIT
-setTimeout(function() {
-  const id = getOrCreateId();
-  const state = getState();
-
-  if (state && state.used) {
-    document.getElementById('used-date').textContent = 'Kullanım: ' + state.usedAt;
-    show('s-used');
-    return;
-  }
-
-  if (state && state.confirmed) {
-    document.getElementById('code-confirmed').textContent = formatCode(id);
-    document.getElementById('confirmed-date').textContent = 'Aktifleştirildi: ' + state.usedAt;
-    show('s-confirmed');
-    return;
-  }
-
-  document.getElementById('code-fresh').textContent = formatCode(id);
-  show('s-fresh');
-}, 800);
-
-// CONFIRM
-document.getElementById('btn-confirm').addEventListener('click', function() {
-  this.disabled = true;
-  this.textContent = 'Kaydediliyor…';
-  const id = getOrCreateId();
-  const now = new Date().toLocaleString('tr-TR', {dateStyle:'medium', timeStyle:'short'});
-  setState({ confirmed: true, used: false, usedAt: now });
-  setTimeout(function() {
-    document.getElementById('code-confirmed').textContent = formatCode(id);
-    document.getElementById('confirmed-date').textContent = 'Aktifleştirildi: ' + now;
-    show('s-confirmed');
-  }, 500);
-});
-</script>
-</body>
-</html>
+var LANG = {
+  tr: {
+    freshHeadline: 'Birlikte<br><span style="color:#C8A96E;font-style:italic">1 Yıl.</span>',
+    freshSubhead: 'Seninle büyüdük — teşekkür ederiz',
+    freshThanks: 'Bu bir yılda kahve içtiğin, vakit geçirdiğin ve bize güvendiğin için gerçekten <strong style="color:#1E3D29">çok teşekkür ederiz.</strong>',
+    pctLabel: 'İNDİRİM KUPONU',
+    codeSub: 'Kasaya göster · Tek kullanımlık',
+    btnConfirm: '✓\u2002Katıldım, kuponu kullanacağım',
+    fine: 'Butona basmak kuponu aktifleştirir. Bir kez kullanılabilir.<br>Geçerlilik: tüm ürünler · Panama Coffee Taşucu',
+    confHeadline: 'Kuponu<br>kazandın!',
+    confSubhead: 'Kasiyer bu ekranı görsün',
+    confThanks: 'Sonraki ziyaretinde tüm ürünlerde <strong style="color:#1E3D29">%20
 
