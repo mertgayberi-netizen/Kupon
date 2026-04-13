@@ -150,5 +150,143 @@ var LANG = {
     fine: 'Butona basmak kuponu aktifleştirir. Bir kez kullanılabilir.<br>Geçerlilik: tüm ürünler · Panama Coffee Taşucu',
     confHeadline: 'Kuponu<br>kazandın!',
     confSubhead: 'Kasiyer bu ekranı görsün',
-    confThanks: 'Sonraki ziyaretinde tüm ürünlerde <strong style="color:#1E3D29">%20
+    confThanks: 'Sonraki ziyaretinde tüm ürünlerde <strong style="color:#1E3D29">%20 indirim</strong> kazandın. Bu sayfayı kasiyere göster.',
+    confCodeSub: '✓ Aktifleştirildi',
+    confPctLabel: 'İNDİRİM KUPONU · AKTİF',
+    usedHeadline: 'Bu kupon<br>kullanıldı.',
+    usedThanks: 'Bu indirim kuponu daha önce kullanılmış.<br>Bize bir yıllık güvenin için teşekkürler — seni tekrar görmekten mutluluk duyarız. 🌿',
+    activatedAt: 'Aktifleştirildi',
+    usedAt: 'Kullanım'
+  },
+  ru: {
+    freshHeadline: '1 год<br><span style="color:#C8A96E;font-style:italic">вместе.</span>',
+    freshSubhead: 'Мы росли вместе с тобой — спасибо',
+    freshThanks: 'За этот год, за каждую чашку кофе и за доверие — мы говорим тебе <strong style="color:#1E3D29">большое спасибо.</strong>',
+    pctLabel: 'КУПОН НА СКИДКУ',
+    codeSub: 'Покажи кассиру · Одноразовый',
+    btnConfirm: '✓\u2002Участвую, использую купон',
+    fine: 'Нажатие кнопки активирует купон. Можно использовать один раз.<br>Действует на все товары · Panama Coffee Taşucu',
+    confHeadline: 'Купон<br>получен!',
+    confSubhead: 'Покажи этот экран кассиру',
+    confThanks: 'При следующем визите ты получишь <strong style="color:#1E3D29">скидку 20%</strong> на все товары. Покажи эту страницу кассиру.',
+    confCodeSub: '✓ Активирован',
+    confPctLabel: 'КУПОН НА СКИДКУ · АКТИВЕН',
+    usedHeadline: 'Купон уже<br>использован.',
+    usedThanks: 'Этот купон был использован ранее.<br>Спасибо за год доверия — будем рады видеть тебя снова. 🌿',
+    activatedAt: 'Активирован',
+    usedAt: 'Использован'
+  }
+};
 
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function formatCode(id) {
+  return id.replace(/([A-Za-z]+)(\d+)/, '$1-$2').toUpperCase();
+}
+
+function getOrCreateId() {
+  var id = localStorage.getItem('panama_kupon_id');
+  if (!id) {
+    id = 'PTK' + Math.random().toString(36).substr(2,6).toUpperCase();
+    localStorage.setItem('panama_kupon_id', id);
+  }
+  return id;
+}
+
+function getState() {
+  var s = localStorage.getItem('panama_kupon_state');
+  return s ? JSON.parse(s) : null;
+}
+
+function setState(data) {
+  localStorage.setItem('panama_kupon_state', JSON.stringify(data));
+}
+
+function applyLang(lang) {
+  var L = LANG[lang];
+  var id = getOrCreateId();
+  var code = formatCode(id);
+
+  document.getElementById('fresh-headline').innerHTML = L.freshHeadline;
+  document.getElementById('fresh-subhead').textContent = L.freshSubhead;
+  document.getElementById('fresh-thanks').innerHTML = L.freshThanks;
+  document.getElementById('fresh-pct-label').textContent = L.pctLabel;
+  document.getElementById('code-fresh').textContent = code;
+  document.getElementById('fresh-code-sub').textContent = L.codeSub;
+  document.getElementById('btn-confirm').textContent = L.btnConfirm;
+  document.getElementById('fresh-fine').innerHTML = L.fine;
+
+  document.getElementById('conf-headline').innerHTML = L.confHeadline;
+  document.getElementById('conf-subhead').textContent = L.confSubhead;
+  document.getElementById('conf-thanks').innerHTML = L.confThanks;
+  document.getElementById('conf-pct-label').textContent = L.confPctLabel;
+  document.getElementById('code-confirmed').textContent = code;
+  document.getElementById('conf-code-sub').textContent = L.confCodeSub;
+
+  document.getElementById('used-headline').innerHTML = L.usedHeadline;
+  document.getElementById('used-thanks').innerHTML = L.usedThanks;
+}
+
+function setLang(lang) {
+  localStorage.setItem('panama_lang', lang);
+  applyLang(lang);
+
+  var state = getState();
+  if (state && state.used) {
+    var L = LANG[lang];
+    document.getElementById('used-date').textContent = L.usedAt + ': ' + state.usedAt;
+    show('s-used');
+  } else if (state && state.confirmed) {
+    var L = LANG[lang];
+    document.getElementById('confirmed-date').textContent = L.activatedAt + ': ' + state.usedAt;
+    show('s-confirmed');
+  } else {
+    show('s-fresh');
+  }
+}
+
+// CONFIRM butonu
+document.getElementById('btn-confirm').addEventListener('click', function() {
+  this.disabled = true;
+  var lang = localStorage.getItem('panama_lang') || 'tr';
+  this.textContent = lang === 'tr' ? 'Kaydediliyor…' : 'Сохранение…';
+  var id = getOrCreateId();
+  var now = new Date().toLocaleString('tr-TR', {dateStyle:'medium', timeStyle:'short'});
+  setState({ confirmed: true, used: false, usedAt: now });
+
+  setTimeout(function() {
+    var L = LANG[lang];
+    document.getElementById('code-confirmed').textContent = formatCode(id);
+    document.getElementById('confirmed-date').textContent = L.activatedAt + ': ' + now;
+    show('s-confirmed');
+  }, 500);
+});
+
+// INIT
+setTimeout(function() {
+  var savedLang = localStorage.getItem('panama_lang');
+  var state = getState();
+
+  // Kupon zaten kullanılmışsa dil seçiciyi atla
+  if (state && (state.used || state.confirmed) && savedLang) {
+    applyLang(savedLang);
+    if (state.used) {
+      var L = LANG[savedLang];
+      document.getElementById('used-date').textContent = L.usedAt + ': ' + state.usedAt;
+      show('s-used');
+    } else {
+      var L = LANG[savedLang];
+      document.getElementById('confirmed-date').textContent = L.activatedAt + ': ' + state.usedAt;
+      show('s-confirmed');
+    }
+    return;
+  }
+
+  show('s-lang');
+}, 600);
+</script>
+</body>
+</html>
